@@ -1,0 +1,18 @@
+PREFIX ex: <http://example.org/>
+PREFIX app: <http://bittich.be/>
+
+INSERT DATA {
+  GRAPH <http://bittich.be/AppGraphProtected> {
+    ex:data1 a app:AppDataProtected ;
+              app:hasName "First Protected Data" ;
+              app:hasID "12345" .
+
+    ex:data2 a app:AppDataProtected ;
+              app:hasName "Second Protected Data" ;
+              app:hasID "67890" .
+
+    ex:data3 a app:AppDataProtected ;
+              app:hasName "Third Protected Data" ;
+              app:hasID "ABCDE" .
+  }
+}

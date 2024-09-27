@@ -1,0 +1,18 @@
+# Virtuoso files /data/db
+/data/db/*
+/data/ldes-feed/*
+!/data/db/virtuoso.ini
+!/data/db/toLoad
+!/data/db/toLoad/*
+/data/files/*
+docker-compose.override.yml
+.idea
+*.iml
+
+/data/elasticsearch/**
+/tmp
+*.DS_Store
+.env
+node_modules
+__pycache__/
+Pipfile.lock

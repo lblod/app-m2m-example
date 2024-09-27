@@ -1,0 +1,71 @@
+version: "3.4"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  identifier:
+    image: semtech/mu-identifier:1.10.1
+    links:
+      - dispatcher:dispatcher
+    environment:
+      DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN_HEADER: "*"
+    labels:
+      - "logging=true"
+    restart: always
+    logging: *default-logging
+    ports:
+      - "80:80"
+  dispatcher:
+    image: semtech/mu-dispatcher:2.1.0-beta.1
+    volumes:
+      - ./config/dispatcher:/config
+    labels:
+      - "logging=true"
+    restart: always
+    logging: *default-logging
+  triplestore:
+    ports:
+      - "8890:8890"
+    image: redpencil/virtuoso:1.0.0
+    environment:
+      SPARQL_UPDATE: "true"
+      DEFAULT_GRAPH: "http://mu.semte.ch/application"
+    volumes:
+      - ./data/db:/data
+      - ./config/db/virtuoso.ini:/data/virtuoso.ini
+    labels:
+      - "logging=true"
+    restart: always
+    logging: *default-logging
+  db:
+    image: semtech/mu-authorization:0.6.0-beta.8
+    environment:
+      MU_SPARQL_ENDPOINT: "http://triplestore:8890/sparql"
+      LOG_ACCESS_RIGHTS: "true"
+      LOG_INCOMING_SPARQL_QUERIES: "true"
+      LOG_OUTGOING_SPARQL_QUERIES: "true"
+      INSPECT_ACCESS_RIGHTS_PROCESSING: "true"
+    volumes:
+      - ./config/authorization:/config
+    restart: always
+  migrations:
+    image: semtech/mu-migrations-service
+    links:
+      - triplestore:database
+    volumes:
+      - ./config/migrations:/data/migrations
+    labels:
+      - "logging=true"
+    restart: always
+    logging: *default-logging
+  m2m:
+    image: lblod/m2m-login-service
+    links:
+      - db:database
+    environment:
+      MU_APPLICATION_GRAPH: "http://mu.semte.ch/graphs/public"
+      MU_APPLICATION_AUTH_DISCOVERY_URL: "https://authenticatie-ti.vlaanderen.be/.well-known/oauth-authorization-server/op"
